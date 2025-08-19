@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../widgets/interactive_ring.dart';
-
 
 // Importing necessary modules
 import '../models/habit_event.dart';
@@ -8,6 +6,8 @@ import '../services/db_helper.dart';
 import '../services/location_service.dart';
 import '../services/habit_detection.dart';
 import '../screens/overview.dart';
+import '../widgets/interactive_ring.dart'; // ✅ new import
+import '../screens/ai_insights.dart'; // ✅ new import
 
 /// The main screen users interact with.
 /// Displays logging options, AI insights, and recent habits.
@@ -45,19 +45,40 @@ class _HomeScreenState extends State<HomeScreen> {
     final name = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Log Event'),
+        backgroundColor: Colors.black, // dark background
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Log Event', style: TextStyle(color: Colors.white)),
         content: TextField(
           controller: nameController,
-          decoration: const InputDecoration(hintText: 'Enter event name'),
+          style: const TextStyle(color: Colors.white),
+          decoration: const InputDecoration(
+            hintText: 'Enter event name',
+            hintStyle: TextStyle(color: Colors.grey),
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.red),
+            ),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: const Text('Cancel', style: TextStyle(color: Colors.red)),
           ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             onPressed: () => Navigator.pop(context, nameController.text.trim()),
-            child: const Text('Save'),
+            child: const Text(
+              'Save',
+              style: TextStyle(color: Colors.white), // or any color you want
+            ),
           ),
         ],
       ),
@@ -72,8 +93,8 @@ class _HomeScreenState extends State<HomeScreen> {
     // Create a new HabitEvent
     final event = HabitEvent(
       name: name,
-      timestamp: DateTime.now(), // CHANGE: Set custom time for testing
-      lat: pos?.latitude, // CHANGE: Replace with fake coordinates
+      timestamp: DateTime.now(),
+      lat: pos?.latitude,
       lng: pos?.longitude,
     );
 
@@ -91,7 +112,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // CHANGE: Modify card color and shape here
     final Color cardColor = const Color(0xFF1C1C1E);
     final double cardRadius = 14;
 
@@ -106,20 +126,14 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            color: cardColor, // CHANGE: Set to different background color
-            borderRadius: BorderRadius.circular(
-              cardRadius,
-            ), // CHANGE: Try 30 or 0
+            color: cardColor,
+            borderRadius: BorderRadius.circular(cardRadius),
           ),
           padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                color: Colors.white,
-                size: 28,
-              ), // CHANGE: Icon size/color
+              Icon(icon, color: Colors.white, size: 28),
               const SizedBox(height: 8),
               Text(
                 title,
@@ -142,125 +156,12 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.black, // CHANGE: Background color of whole screen
+      backgroundColor: Colors.black,
       body: SafeArea(
         child: Column(
           children: [
-            // === Upper Section: Mic Animation Header ===
-            Container(
-              padding: const EdgeInsets.all(16),
-              width: double.infinity,
-              child: Column(
-                children: [
-                  const Text(
-                    "Pie Equalizer", // You can rename it to "Pie is Listening..."
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // === Custom Circular Equalizer UI ===
-                  SizedBox(
-                    width: 220,
-                    height: 220,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Outer glowing circle
-                        Container(
-                          width: 220,
-                          height: 220,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: RadialGradient(
-                              colors: [
-                                Colors.red.withOpacity(0.6),
-                                Colors.black,
-                              ],
-                              stops: const [0.3, 1],
-                            ),
-                          ),
-                        ),
-
-                        // Mid label (top)
-                        const Positioned(
-                          top: 8,
-                          child: Text(
-                            "Mid -3",
-                            style: TextStyle(color: Colors.red, fontSize: 14),
-                          ),
-                        ),
-
-                        // Bass label (left)
-                        const Positioned(
-                          left: 8,
-                          top: 100,
-                          child: RotatedBox(
-                            quarterTurns: -1,
-                            child: Text(
-                              "Bass +6",
-                              style: TextStyle(color: Colors.white70, fontSize: 12),
-                            ),
-                          ),
-                        ),
-
-                        // Treble label (right)
-                        const Positioned(
-                          right: 8,
-                          top: 100,
-                          child: RotatedBox(
-                            quarterTurns: 1,
-                            child: Text(
-                              "Treble +6",
-                              style: TextStyle(color: Colors.white70, fontSize: 12),
-                            ),
-                          ),
-                        ),
-
-                        // Center circle
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: const BoxDecoration(
-                            color: Colors.black,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-
-                        // Knob (red dot)
-                        Positioned(
-                          top: 60, // adjust to move up/down
-                          child: Container(
-                            width: 18,
-                            height: 18,
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-
-                        // Value at bottom
-                        const Positioned(
-                          bottom: 10,
-                          child: Text(
-                            "-3",
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // === Upper Section: Interactive Ring ===
+            const InteractiveRing(),
 
             const SizedBox(height: 10),
 
@@ -269,10 +170,10 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: GridView.count(
-                  crossAxisCount: 2, // CHANGE: Try 1 or 3 columns
-                  mainAxisSpacing: 12, // CHANGE: Try larger spacing
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
-                  childAspectRatio: 1.2, // CHANGE: Try 1.0 for square cards
+                  childAspectRatio: 1.2,
                   children: [
                     featureCard(
                       icon: Icons.psychology,
@@ -285,28 +186,31 @@ class _HomeScreenState extends State<HomeScreen> {
                       title: "AI Insights",
                       subtitle: "Personal Suggestions",
                       onTap: () {
-                        // CHANGE: Navigate to insights screen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AiInsightsScreen(),
+                          ),
+                        );
                       },
                     ),
                     featureCard(
                       icon: Icons.timeline,
                       title: "Event History",
-                      subtitle: "${_events.length} events", // Dynamic subtitle
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => OverviewScreen(),
-                          ), // CHANGE: Navigate to history screen
-                        );
-                      },
+                      subtitle: "${_events.length} events",
+                      onTap: () {},
                     ),
                     featureCard(
                       icon: Icons.bar_chart,
                       title: "Trends",
                       subtitle: "Weekly / Monthly",
                       onTap: () {
-                        // CHANGE: Navigate to trends visualization
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const OverviewScreen(),
+                          ),
+                        );
                       },
                     ),
                     featureCard(
@@ -314,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       title: "Location",
                       subtitle: "Track Surroundings",
                       onTap: () {
-                        // CHANGE: Navigate to map screen
+                        // TODO: Navigate to map screen
                       },
                     ),
                     featureCard(
@@ -322,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       title: "Custom Controls",
                       subtitle: "Personalised",
                       onTap: () {
-                        // CHANGE: Navigate to settings/preferences
+                        // TODO: Navigate to settings/preferences
                       },
                     ),
                   ],
